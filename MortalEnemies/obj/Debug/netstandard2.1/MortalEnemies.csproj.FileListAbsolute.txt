@@ -1,0 +1,16 @@
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\bin\Debug\netstandard2.1\rivinwin.MortalEnemies.deps.json
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\bin\Debug\netstandard2.1\rivinwin.MortalEnemies.dll
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\bin\Debug\netstandard2.1\PhotonRealtime.dll
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\bin\Debug\netstandard2.1\PhotonUnityNetworking.dll
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\bin\Debug\netstandard2.1\PhotonUnityNetworking.Utilities.dll
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\bin\Debug\netstandard2.1\UnityEngine.UI.dll
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\bin\Debug\netstandard2.1\Zorro.Core.Runtime.dll
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\obj\Debug\netstandard2.1\MortalEnemies.csproj.AssemblyReference.cache
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\obj\Debug\netstandard2.1\MortalEnemies.IgnoresAccessChecksTo.cs
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\obj\Debug\netstandard2.1\MyPluginInfo.cs
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\obj\Debug\netstandard2.1\MortalEnemies.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\obj\Debug\netstandard2.1\MortalEnemies.AssemblyInfoInputs.cache
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\obj\Debug\netstandard2.1\MortalEnemies.AssemblyInfo.cs
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\obj\Debug\netstandard2.1\MortalEnemies.csproj.CoreCompileInputs.cache
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\obj\Debug\netstandard2.1\MortalEnemies.csproj.CopyComplete
+C:\Users\Rivinwin\Desktop\Programming\Content Warning Mods\MortalEnemies\MortalEnemies\obj\Debug\netstandard2.1\rivinwin.MortalEnemies.dll
