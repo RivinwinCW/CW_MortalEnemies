@@ -37,6 +37,12 @@
         viewing Private Information in stack traces.
         -->
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <Title>Mortal Enemies</Title>
+        <Description>A Content Warning mod to make enemies damageable, used as a dependancy.</Description>
+        <PackageProjectUrl></PackageProjectUrl>
+        <RepositoryUrl>https://github.com/RivinwinCW/CW_MortalEnemies</RepositoryUrl>
+        <PackageReleaseNotes>Alpha build</PackageReleaseNotes>
     </PropertyGroup>
 
     <!-- Primary Package References -->

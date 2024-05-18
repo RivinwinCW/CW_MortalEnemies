@@ -34,18 +34,23 @@ namespace MortalEnemies
 				return; // Sanity check
 			}
 
-			playerRef = GetComponentInParent<Player>();
+			playerRef = GetComponentInChildren<Player>();
 			if (playerRef = null) MortalEnemies.Logger.LogDebug("Ragdolling not supported");
 
 			componentsToDeactivate.Add(botRef);
-			foreach (MonoBehaviour tempMono in botRef.GetComponents<MonoBehaviour>())
+			foreach (MonoBehaviour tempMono in botRef.GetComponentsInChildren<MonoBehaviour>())
 			{
 				if (tempMono.GetType().ToString().Contains("Bot_") && !tempMono.GetType().ToString().Contains("Ragdoll")) componentsToDeactivate.Add(tempMono);
 			}
+			componentsToDeactivate.Add(botRef.transform.parent.gameObject.GetComponentInChildren<PlayerRagdoll>());
 
 			// Logging
 			MortalEnemies.Logger.LogDebug("List of Monobehaviours to deactivate:");
-			foreach (MonoBehaviour tempMono in componentsToDeactivate) MortalEnemies.Logger.LogDebug($"  └{tempMono.transform.parent.gameObject.name} -> {tempMono.GetType().ToString()}");
+			foreach (MonoBehaviour tempMono in componentsToDeactivate)
+			{
+				string tempType = (tempMono is null || tempMono.GetType() is null || tempMono.GetType().ToString() is null) ? "null" : tempMono.GetType().ToString();
+				MortalEnemies.Logger.LogDebug($"  └{containerObjectName} -> {tempType}");
+			}
 
 			// Debug HUD
 			//MortalityHUDSource newSource = newBotRef.gameObject.AddComponent<MortalityHUDSource>();
@@ -76,19 +81,19 @@ namespace MortalEnemies
 
 			foreach (MonoBehaviour tempComponent in componentsToDeactivate)
 			{
-				MortalEnemies.Logger.LogDebug($"  └{tempComponent.gameObject.name} -> {tempComponent.GetType()} disabled");
+				MortalEnemies.Logger.LogDebug($"  └{containerObjectName} -> {tempComponent.GetType()} disabled");
 				tempComponent.enabled = false;
 			}
 			botRef.DoNothing();
 
 			if (playerRef is not null)
 			{
-				PlayerRagdoll playerRag = playerRef.GetComponent<PlayerRagdoll>();
-				if (playerRag is null) MortalEnemies.Logger.LogDebug("Could not find ragdoll component!");
+				PlayerRagdoll playerRagdoll = playerRef.refs.ragdoll;
+				if (playerRagdoll is null) MortalEnemies.Logger.LogDebug("Could not find ragdoll component!");
 				else
 				{
-					playerRag.ToggleSimplifiedRagdoll(true);
-					playerRag.ToggleGravity(true);
+					playerRagdoll.ToggleSimplifiedRagdoll(true);
+					playerRagdoll.ToggleGravity(true);
 				}
 			}
 			// TODO trigger ragdoll
@@ -113,7 +118,7 @@ namespace MortalEnemies
 
 			foreach (MonoBehaviour tempComponent in componentsToDeactivate)
 			{
-				MortalEnemies.Logger.LogDebug($"  └{tempComponent.gameObject.name} -> {tempComponent.GetType()} enabled");
+				MortalEnemies.Logger.LogDebug($"  └{containerObjectName} -> {tempComponent.GetType()} enabled");
 				tempComponent.enabled = true;
 			}
 			// TODO trigger unragdoll

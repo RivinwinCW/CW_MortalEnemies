@@ -14,6 +14,10 @@ namespace MortalEnemies
 		 * ReviveEffect
 		 */
 
+		// TRANSFORM VARIABLES
+		internal string containerObjectName = "Unknown";
+		internal GameObject? containerObject;
+
 		// CONSTANTS
 		public static readonly uint modId = (uint)MyPluginInfo.PLUGIN_GUID.GetHashCode(); // was suggested going to unity.hash128
 
@@ -40,6 +44,17 @@ namespace MortalEnemies
 		{
 			// Create Singleton if it doesnt exist
 			MortalSingleton tempSingletonRef = MortalSingleton.Instance;
+
+			containerObject = gameObject;
+			while (!containerObject.name.Contains("(Clone)") && containerObject.transform.parent != null)
+			{
+				containerObject = containerObject.transform.parent.gameObject;
+			}
+			if (containerObject is not null)
+			{
+				containerObjectName = containerObject.name;
+				if (containerObjectName.Contains("(Clone)")) transform.SetParent(containerObject.transform);
+			}
 
 			// Set up networking variables
 			viewIDClone = GetComponent<PhotonView>().ViewID;
