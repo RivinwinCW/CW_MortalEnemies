@@ -4,12 +4,15 @@ namespace MortalEnemies
 {
 	internal class Mortality_Player : Mortality
 	{
-		protected float nextDoTEffects, nextDamageEffects, nextHoTEffects, nextHealEffects;
-		protected float DoTEffectInterval = 1f, DamageEffectInterval = .2f, HoTEffectInterval = 1f, HealEffectInterval = .2f;
+		protected float nextDoTEffects, nextDamageEffects, nextHealEffects;
+		
 
 		internal bool attachedToLocalPlayer;
 		internal Player? playerRef;
 		internal Player.PlayerData? playerData;
+
+		//DoT
+		protected float dotEffectInterval = .75f, damageEffectInterval = .09f, healEffectInterval = .09f;
 
 		internal void SetPlayer(Player newPlayerRef)
 		{
@@ -26,7 +29,8 @@ namespace MortalEnemies
 			get { return playerData == null ? 100f : playerData.health; }
 			internal set
 			{
-				playerData.health = value;
+				if (playerData is null) return;
+				playerData.health = Mathf.Min(value, MaxHealth);
 			}
 		}
 
@@ -42,7 +46,7 @@ namespace MortalEnemies
 			if (Time.time > nextDamageEffects)
 			{
 				UI_Feedback.instance.TakeDamage();
-				nextDamageEffects = Time.time + DamageEffectInterval;
+				nextDamageEffects = Time.time + damageEffectInterval;
 			}
 		}
 
@@ -51,7 +55,7 @@ namespace MortalEnemies
 			if (Time.time > nextDoTEffects)
 			{
 				UI_Feedback.instance.TakeDamage();
-				nextDoTEffects = Time.time + DoTEffectInterval;
+				nextDoTEffects = Time.time + dotEffectInterval;
 			}
 		}
 
@@ -60,7 +64,7 @@ namespace MortalEnemies
 			if (Time.time > nextHealEffects)
 			{
 				UI_Feedback.instance.HealFeedback();
-				nextHealEffects = Time.time + HealEffectInterval;
+				nextHealEffects = Time.time + healEffectInterval;
 			}
 		}
 
@@ -69,7 +73,7 @@ namespace MortalEnemies
 			if (Time.time > nextDoTEffects)
 			{
 				UI_Feedback.instance.HealFeedback();
-				nextHoTEffects = Time.time + HoTEffectInterval;
+				nextDoTEffects = Time.time + dotEffectInterval;
 			}
 		}
 
@@ -80,6 +84,8 @@ namespace MortalEnemies
 
 		protected override void ReviveEffect()
 		{
+			if (!playerData.dead) return;
+
 			playerData.dead = false;
 
 			if (attachedToLocalPlayer)

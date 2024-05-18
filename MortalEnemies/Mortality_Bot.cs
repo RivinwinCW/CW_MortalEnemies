@@ -1,6 +1,4 @@
-﻿using MyceliumNetworking;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace MortalEnemies
@@ -9,6 +7,7 @@ namespace MortalEnemies
 	{
 		private float health, maxHealth = 100f;
 		private Bot? botRef;
+		private Player? playerRef;
 		private HashSet<MonoBehaviour>? componentsToDeactivate;
 
 		protected override void Awake()
@@ -18,12 +17,25 @@ namespace MortalEnemies
 			MortalSingleton.Instance.BotMortalities.Add(this);
 		}
 
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+			MortalSingleton.Instance.BotMortalities.Remove(this);
+		}
+
 		internal void SetBot(Bot newBotRef)
 		{
 			botRef = newBotRef;
 			componentsToDeactivate = new(); // Clear hashset
 
-			if (botRef == null) return; // Sanity check
+			if (botRef == null)
+			{
+				playerRef = null;
+				return; // Sanity check
+			}
+
+			playerRef = GetComponentInParent<Player>();
+			if (playerRef = null) MortalEnemies.Logger.LogDebug("Ragdolling not supported");
 
 			componentsToDeactivate.Add(botRef);
 			foreach (MonoBehaviour tempMono in botRef.GetComponents<MonoBehaviour>())
@@ -36,8 +48,8 @@ namespace MortalEnemies
 			foreach (MonoBehaviour tempMono in componentsToDeactivate) MortalEnemies.Logger.LogDebug($"  └{tempMono.transform.parent.gameObject.name} -> {tempMono.GetType().ToString()}");
 
 			// Debug HUD
-			MortalityHUDSource newSource = newBotRef.gameObject.AddComponent<MortalityHUDSource>();
-			newSource.SetMortality(this);
+			//MortalityHUDSource newSource = newBotRef.gameObject.AddComponent<MortalityHUDSource>();
+			//newSource.SetMortality(this);
 		}
 
 		public override float Health
@@ -45,9 +57,8 @@ namespace MortalEnemies
 			get { return health; }
 			internal set
 			{
-				health = value;
-				if (health <= 0f) KillEffect();
-				health = 0f;
+				if (IsAlive && value <= 0f) KillEffect();
+				health = Mathf.Max(value, 0f);
 			}
 		}
 
@@ -61,12 +72,25 @@ namespace MortalEnemies
 		{
 			if (botRef == null || componentsToDeactivate == null) return;
 
+			BotHandler.instance.bots.Remove(botRef);
+
 			foreach (MonoBehaviour tempComponent in componentsToDeactivate)
 			{
-				MortalEnemies.Logger.LogDebug($"  └{tempComponent.gameObject.name} -> {tempComponent.GetType().ToString()} disabled");
+				MortalEnemies.Logger.LogDebug($"  └{tempComponent.gameObject.name} -> {tempComponent.GetType()} disabled");
 				tempComponent.enabled = false;
 			}
 			botRef.DoNothing();
+
+			if (playerRef is not null)
+			{
+				PlayerRagdoll playerRag = playerRef.GetComponent<PlayerRagdoll>();
+				if (playerRag is null) MortalEnemies.Logger.LogDebug("Could not find ragdoll component!");
+				else
+				{
+					playerRag.ToggleSimplifiedRagdoll(true);
+					playerRag.ToggleGravity(true);
+				}
+			}
 			// TODO trigger ragdoll
 		}
 
@@ -74,9 +98,22 @@ namespace MortalEnemies
 		{
 			if (botRef == null || componentsToDeactivate == null) return;
 
+			BotHandler.instance.bots.Add(botRef);
+
+			if (playerRef is not null)
+			{
+				PlayerRagdoll playerRag = playerRef.GetComponent<PlayerRagdoll>();
+				if (playerRag is null) MortalEnemies.Logger.LogDebug("Could not find ragdoll component!");
+				else
+				{
+					playerRag.ToggleSimplifiedRagdoll(false);
+					playerRag.ToggleGravity(false);
+				}
+			}
+
 			foreach (MonoBehaviour tempComponent in componentsToDeactivate)
 			{
-				MortalEnemies.Logger.LogDebug($"  └{tempComponent.gameObject.name} -> {tempComponent.GetType().ToString()} enabled");
+				MortalEnemies.Logger.LogDebug($"  └{tempComponent.gameObject.name} -> {tempComponent.GetType()} enabled");
 				tempComponent.enabled = true;
 			}
 			// TODO trigger unragdoll

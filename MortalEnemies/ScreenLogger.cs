@@ -1,6 +1,5 @@
 ﻿using BepInEx.Logging;
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 
 namespace MortalEnemies
@@ -30,7 +29,7 @@ namespace MortalEnemies
 			gameObject.transform.localPosition = Vector3.zero;
 			gameObject.transform.localScale = new Vector3(1, 1, 1);
 			RectTransform test = gameObject.AddComponent<RectTransform>();
-			test.anchorMin = new Vector2(0.6f, 0.05f); //0.6f, 0.6f
+			test.anchorMin = new Vector2(0.75f, 0.05f); //0.6f, 0.6f
 			test.anchorMax = new Vector2(0.943f, 0.95f); //0.943f, 0.89f
 
 			CanvasRenderer canvasRenderer = gameObject.AddComponent<CanvasRenderer>();

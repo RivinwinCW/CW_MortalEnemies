@@ -16,6 +16,9 @@ namespace MortalEnemies.Patches
 			HookEndpointManager.Add(AccessTools.Method(typeof(Bot), "Start"), HookBotAwake);
 			HookEndpointManager.Add(AccessTools.Method(typeof(Player), "Awake"), HookPlayerAwake);
 
+			// Register mod to Mycelium
+
+
 			// Subscribe to Mycelium events
 			MyceliumNetwork.LobbyEntered += Mortality.UpdateNetworkState;
 			MyceliumNetwork.LobbyLeft += Mortality.UpdateNetworkState;
@@ -40,7 +43,7 @@ namespace MortalEnemies.Patches
 			// Create a mortality component and attach to same GameObject as Bot
 			if (self.gameObject.GetComponent<Mortality>() != null)
 			{
-				MortalEnemies.Logger.LogDebug("Adding additional Mortality component to same object");
+				MortalEnemies.Logger.LogDebug("Tried adding additional Mortality component to same object");
 				return;
 			}
 
@@ -50,13 +53,16 @@ namespace MortalEnemies.Patches
 
 		public static void HookPlayerAwake(Action<Player> orig, Player self)
 		{
-			MortalEnemies.Logger.LogDebug("Adding Mortality to " + self.gameObject.name);
-
 			// Run original Awake() function
 			orig(self);
 
+			// Sanity check
+			if (self.ai) return;
+
+			MortalEnemies.Logger.LogDebug("Adding Mortality to " + self.gameObject.name);
 			// Create a mortality component and attach to same GameObject as Player
 			Mortality_Player newMortality = self.gameObject.AddComponent<Mortality_Player>();
+			if (newMortality is null) MortalEnemies.Logger.LogDebug("Failed to add Mortality component!");
 			newMortality?.SetPlayer(self);
 		}
 	}

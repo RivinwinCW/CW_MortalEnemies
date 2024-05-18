@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\MortalEnemies\\MortalEnemies.csproj": {}
+    "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\CW_MortalEnemies\\MortalEnemies\\MortalEnemies.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\MortalEnemies\\MortalEnemies.csproj": {
+    "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\CW_MortalEnemies\\MortalEnemies\\MortalEnemies.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\MortalEnemies\\MortalEnemies.csproj",
+        "projectUniqueName": "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\CW_MortalEnemies\\MortalEnemies\\MortalEnemies.csproj",
         "projectName": "rivinwin.MortalEnemies",
-        "projectPath": "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\MortalEnemies\\MortalEnemies.csproj",
+        "projectPath": "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\CW_MortalEnemies\\MortalEnemies\\MortalEnemies.csproj",
         "packagesPath": "C:\\Users\\Rivinwin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\MortalEnemies\\obj\\",
+        "outputPath": "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\CW_MortalEnemies\\MortalEnemies\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

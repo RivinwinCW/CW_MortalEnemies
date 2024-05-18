@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "pr7QzJaontzUcrMjb1T+AR1EFcPPczzsIbbV5QwwCQNTRYtstjonLfaIrC6CDBjJOJAMM1nj/HYjKvo0Z/CwKQ==",
+  "dgSpecHash": "aKK1gwagU/U0ipdmSK7+q/9kDvY42mjiE4FnynetosNVQY06H6I5KPKKmO3bPbU16jHCpyWdskBrK0cVY8/JRg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\MortalEnemies\\MortalEnemies.csproj",
+  "projectFilePath": "C:\\Users\\Rivinwin\\Desktop\\Programming\\Content Warning Mods\\MortalEnemies\\CW_MortalEnemies\\MortalEnemies\\MortalEnemies.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Rivinwin\\.nuget\\packages\\bepinex.analyzers\\1.0.8\\bepinex.analyzers.1.0.8.nupkg.sha512",
     "C:\\Users\\Rivinwin\\.nuget\\packages\\bepinex.assemblypublicizer.msbuild\\0.4.2\\bepinex.assemblypublicizer.msbuild.0.4.2.nupkg.sha512",

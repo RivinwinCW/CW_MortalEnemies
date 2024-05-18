@@ -16,9 +16,7 @@
           "CessilCellsCeaChells": "0.2.9",
           "RugbugRedfern.MyceliumNetworking.CW": "1.0.13",
           "UnityEngine.Modules": "2022.3.10",
-          "PhotonRealtime": "0.0.0.0",
           "PhotonUnityNetworking": "0.0.0.0",
-          "PhotonUnityNetworking.Utilities": "0.0.0.0",
           "UnityEngine.UI": "1.0.0.0",
           "Zorro.Core.Runtime": "0.0.0.0"
         },
@@ -671,25 +669,9 @@
           }
         }
       },
-      "PhotonRealtime/0.0.0.0": {
-        "runtime": {
-          "PhotonRealtime.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
       "PhotonUnityNetworking/0.0.0.0": {
         "runtime": {
           "PhotonUnityNetworking.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
-      "PhotonUnityNetworking.Utilities/0.0.0.0": {
-        "runtime": {
-          "PhotonUnityNetworking.Utilities.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -1006,17 +988,7 @@
       "path": "unityengine.modules/2022.3.10",
       "hashPath": "unityengine.modules.2022.3.10.nupkg.sha512"
     },
-    "PhotonRealtime/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
     "PhotonUnityNetworking/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "PhotonUnityNetworking.Utilities/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

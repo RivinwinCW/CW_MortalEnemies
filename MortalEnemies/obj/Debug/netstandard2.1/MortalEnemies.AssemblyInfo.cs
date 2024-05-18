@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("rivinwin.MortalEnemies")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+603944255d472d5ee944baf7a59e52e43b2d7db6")]
 [assembly: System.Reflection.AssemblyProductAttribute("MortalEnemies")]
 [assembly: System.Reflection.AssemblyTitleAttribute("rivinwin.MortalEnemies")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -45,7 +45,7 @@ namespace MortalEnemies
 			} else
 			{
 				MortalEnemies.Logger.LogDebug("Mortality Components: " + _mortalities.Count);
-				foreach (Mortality tempMortality in _mortalities) MortalEnemies.Logger.LogDebug(" -" + tempMortality.gameObject.name);
+				foreach (Mortality tempMortality in _mortalities) MortalEnemies.Logger.LogDebug("  └" + tempMortality.gameObject.name);
 			}
 		}
 
@@ -110,11 +110,11 @@ namespace MortalEnemies
 			// Debug key: Num5 - Kill all bots
 			if (Input.GetKeyUp(KeyCode.Keypad5))
 			{
-				MortalEnemies.Logger.LogDebug("Test - Kill Bots");
+				MortalEnemies.Logger.LogDebug("Test - Kill all Bots");
 				MortalEnemies.Logger.LogDebug($"  Killing {BotMortalities.Count} bots");
 				foreach (Mortality tempMortality in MortalSingleton.Instance.BotMortalities)
 				{
-					MortalEnemies.Logger.LogDebug($"  └Killing {tempMortality.gameObject.name}, which has {tempMortality.MaxHealth} health");
+					MortalEnemies.Logger.LogDebug($"  └Killing {tempMortality.gameObject.name}, which has {tempMortality.Health} health");
 					tempMortality.Damage(tempMortality.MaxHealth);
 				}
 			}
@@ -122,8 +122,13 @@ namespace MortalEnemies
 			// Debug key: Num6 - Revive all bots
 			if (Input.GetKeyUp(KeyCode.Keypad6))
 			{
-				MortalEnemies.Logger.LogDebug("Test - Revive Bots");
-				foreach (Mortality tempMortality in MortalSingleton.Instance.BotMortalities) if (tempMortality != null && tempMortality.GetType() == typeof(Mortality_Bot)) tempMortality?.Revive(tempMortality.MaxHealth);
+				MortalEnemies.Logger.LogDebug("Test - Revive all Bots");
+				MortalEnemies.Logger.LogDebug($"  Reviving {BotMortalities.Count} bots");
+				foreach (Mortality tempMortality in MortalSingleton.Instance.BotMortalities)
+				{
+					MortalEnemies.Logger.LogDebug($"  └Reviving {tempMortality.gameObject.name}, which has {tempMortality.Health} health");
+					tempMortality.Revive();
+				}
 			}
 		}
 	}

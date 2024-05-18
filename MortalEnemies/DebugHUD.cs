@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace MortalEnemies
 {
@@ -42,7 +41,8 @@ namespace MortalEnemies
 			var canvasGroup = gameObject.AddComponent<CanvasGroup>();
 			canvasGroup.blocksRaycasts = false;
 
-			Font font = Font.CreateDynamicFontFromOSFont("Noto Sans", 16);
+			Font font = Font.CreateDynamicFontFromOSFont("Arial", 16);
+
 		}
 	}
 
@@ -50,6 +50,7 @@ namespace MortalEnemies
 	{
 		// Debug
 		private static Camera? mainCamera;
+		private static bool cameraFound;
 
 		// References
 		private Mortality? targetMortality;
@@ -70,30 +71,32 @@ namespace MortalEnemies
 				return;
 			}
 
-			Player tempPlayer = targetMortality.GetComponentInParent<Player>();
-			if (tempPlayer is null)
+			Player tempPlayer = targetMortality.gameObject.GetComponentInChildren<Player>();
+			if (tempPlayer is null) MortalEnemies.Logger.LogDebug("Player not found in parent gameobject");
+			else
 			{
-				MortalEnemies.Logger.LogDebug("Player not found in parent gameobject");
-				return;
-			}
-			headBone = tempPlayer.refs.ragdoll.GetBodypart(BodypartType.Head).rig.transform;
-			if (headBone is null)
-			{
-				MortalEnemies.Logger.LogDebug("Player does not contain a head bone");
-				return;
+				headBone = tempPlayer.refs.ragdoll.GetBodypart(BodypartType.Head).rig.transform;
+				if (headBone is not null) transform.SetParent(headBone);
+				else MortalEnemies.Logger.LogDebug("Player does not contain a head bone");
 			}
 			
-			MortalEnemies.Logger.LogDebug("Found Head Bone!");
-			transform.SetParent(headBone);
-			gameObject.transform.localPosition = new Vector3(0, 1, 0); // offset above the head
+			gameObject.transform.localPosition = new Vector3(0, 1, 0); // offset above the head, might need to offset during render in order to ignore parent rotation
+			gameObject.AddComponent<Canvas>();
 		}
 
 		void LateUpdate()
 		{
+			if (mainCamera is null) MortalEnemies.Logger.LogDebug("MainCamera is Null!!!!!!!!!!!");
 			if (headBone is null || mainCamera is null) return; // Sanity check, for instance the same frame that the Mortality object or camera gets destroyed
 
+			if (!cameraFound)
+			{
+				MortalEnemies.Logger.LogDebug("Debug HUD - Main camera found");
+				cameraFound = true;
+			}
+
 			Vector3 screenPos = Camera.main.WorldToScreenPoint(this.transform.position);
-			//MortalityHUD.
+			//MortalityHUD
 		}
 	}
 }
