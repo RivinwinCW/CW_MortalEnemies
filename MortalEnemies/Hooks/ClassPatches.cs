@@ -47,7 +47,7 @@ namespace MortalEnemies.Patches
 				return;
 			}
 
-			Mortality_Bot newMortality = self.gameObject.AddComponent<Mortality_Bot>();
+			Mortality_Bot newMortality = self.gameObject.transform.parent.gameObject.AddComponent<Mortality_Bot>();
 			newMortality?.SetBot(self);
 		}
 

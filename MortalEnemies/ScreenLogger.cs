@@ -12,7 +12,7 @@ namespace MortalEnemies
 		Queue logQueue = new Queue(logLength);
 		private UnityEngine.UI.Text? MyText;
 		public GameObject gameObject;
-		public bool outputQueue;
+		public bool outputQueue = true;
 
 		public ScreenLogListener()
 		{
@@ -72,7 +72,7 @@ namespace MortalEnemies
 
 			if (MyText == null) return; // Sanity check in case the listener is externally subscribed to but not instantiated properly
 
-			
+			RepopulateText();
 		}
 
 		// Clear and repopulate the Text component with the contents of the queue

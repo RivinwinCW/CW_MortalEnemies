@@ -40,7 +40,7 @@ namespace MortalEnemies
 			componentsToDeactivate.Add(botRef);
 			foreach (MonoBehaviour tempMono in botRef.GetComponentsInChildren<MonoBehaviour>())
 			{
-				if (tempMono.GetType().ToString().Contains("Bot_") && !tempMono.GetType().ToString().Contains("Ragdoll")) componentsToDeactivate.Add(tempMono);
+				if (tempMono.GetType().ToString().Contains("Bot_") || tempMono.GetType().ToString().Contains("Attack") && !tempMono.GetType().ToString().Contains("Ragdoll")) componentsToDeactivate.Add(tempMono);
 			}
 			componentsToDeactivate.Add(botRef.transform.parent.gameObject.GetComponentInChildren<PlayerRagdoll>());
 
@@ -93,7 +93,6 @@ namespace MortalEnemies
 				else
 				{
 					playerRagdoll.ToggleSimplifiedRagdoll(true);
-					playerRagdoll.ToggleGravity(true);
 				}
 			}
 			// TODO trigger ragdoll
@@ -112,7 +111,6 @@ namespace MortalEnemies
 				else
 				{
 					playerRag.ToggleSimplifiedRagdoll(false);
-					playerRag.ToggleGravity(false);
 				}
 			}
 

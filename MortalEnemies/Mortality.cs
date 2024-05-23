@@ -45,6 +45,9 @@ namespace MortalEnemies
 			// Create Singleton if it doesnt exist
 			MortalSingleton tempSingletonRef = MortalSingleton.Instance;
 
+
+
+
 			containerObject = gameObject;
 			while (!containerObject.name.Contains("(Clone)") && containerObject.transform.parent != null)
 			{
@@ -52,9 +55,18 @@ namespace MortalEnemies
 			}
 			if (containerObject is not null)
 			{
-				containerObjectName = containerObject.name;
-				if (containerObjectName.Contains("(Clone)")) transform.SetParent(containerObject.transform);
+				if (containerObject.name.Contains("(Clone)"))
+				{
+					containerObjectName = containerObject.name;
+					transform.SetParent(containerObject.transform);
+				}
+					
 			}
+
+
+
+
+
 
 			// Set up networking variables
 			viewIDClone = GetComponent<PhotonView>().ViewID;
