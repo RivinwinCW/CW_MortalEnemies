@@ -19,7 +19,7 @@ namespace MortalEnemies
 		{
 			Instance = this;
 			Logger = base.Logger;
-			//ScreenLogListener = new(); // Enables on-screen logging for Mortal Enemies
+			ScreenLogListener = new(); // Enables on-screen logging for Mortal Enemies
 
 			Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} installed, hooking...");
 			

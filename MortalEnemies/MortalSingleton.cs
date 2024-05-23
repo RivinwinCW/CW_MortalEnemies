@@ -5,6 +5,19 @@ namespace MortalEnemies
 {
 	public class MortalSingleton : MonoBehaviour
 	{
+		private static KeyCode[] debugKeys =
+		{
+			KeyCode.Alpha1,
+			KeyCode.Alpha2,
+			KeyCode.Alpha3,
+			KeyCode.Alpha4,
+			KeyCode.Alpha5,
+			KeyCode.Alpha6,
+			KeyCode.Alpha7,
+			KeyCode.Alpha8,
+			KeyCode.Alpha9
+		};
+
 		private static MortalSingleton? _instance;
 		public static MortalSingleton Instance
 		{
@@ -67,8 +80,11 @@ namespace MortalEnemies
 
 		void Update()
 		{
-			// Debug key: Num1 - Test Player Damage
-			if (Input.GetKeyUp(KeyCode.Keypad1))
+			// Debug keys only work when holding CTRL
+			if (!(Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl))) return;
+
+			// Debug key: Test Player Damage
+			if (Input.GetKeyUp(debugKeys[0]))
 			{
 				MortalEnemies.Logger.LogDebug("Test - Player Damage");
 				Mortality tempMortality = Player.localPlayer.gameObject.GetComponent<Mortality>();
@@ -77,8 +93,8 @@ namespace MortalEnemies
 				tempMortality?.Damage(25f);
 			}
 
-			// Debug key: Num2 - Test Player Damage Over Time
-			if (Input.GetKeyUp(KeyCode.Keypad2))
+			// Debug key: Test Player Damage Over Time
+			if (Input.GetKeyUp(debugKeys[1]))
 			{
 				MortalEnemies.Logger.LogDebug("Test - Player Damage Over Time");
 				Mortality tempMortality = Player.localPlayer.gameObject.GetComponent<Mortality>();
@@ -87,8 +103,8 @@ namespace MortalEnemies
 				tempMortality?.DamageOverTime(5f, 5f);
 			}
 
-			// Debug key: Num3 - Test Player Heal
-			if (Input.GetKeyUp(KeyCode.Keypad3))
+			// Debug key: Test Player Heal
+			if (Input.GetKeyUp(debugKeys[2]))
 			{
 				MortalEnemies.Logger.LogDebug("Test - Heal");
 				Mortality tempMortality = Player.localPlayer.gameObject.GetComponent<Mortality>();
@@ -97,8 +113,8 @@ namespace MortalEnemies
 				tempMortality?.Heal(25f);
 			}
 
-			// Debug key: Num4 - Test Player Heal Over Time
-			if (Input.GetKeyUp(KeyCode.Keypad4))
+			// Debug key: Test Player Heal Over Time
+			if (Input.GetKeyUp(debugKeys[3]))
 			{
 				MortalEnemies.Logger.LogDebug("Test - Heal Over Time");
 				Mortality tempMortality = Player.localPlayer.gameObject.GetComponent<Mortality>();
@@ -107,8 +123,8 @@ namespace MortalEnemies
 				tempMortality?.HealOverTime(5f, 5f);
 			}
 
-			// Debug key: Num5 - Kill all bots
-			if (Input.GetKeyUp(KeyCode.Keypad5))
+			// Debug key: Kill all bots
+			if (Input.GetKeyUp(debugKeys[4]))
 			{
 				MortalEnemies.Logger.LogDebug("Test - Kill all Bots");
 				MortalEnemies.Logger.LogDebug($"  Killing {BotMortalities.Count} bots");
@@ -119,8 +135,8 @@ namespace MortalEnemies
 				}
 			}
 
-			// Debug key: Num6 - Revive all bots
-			if (Input.GetKeyUp(KeyCode.Keypad6))
+			// Debug key: Revive all bots
+			if (Input.GetKeyUp(debugKeys[5]))
 			{
 				MortalEnemies.Logger.LogDebug("Test - Revive all Bots");
 				MortalEnemies.Logger.LogDebug($"  Reviving {BotMortalities.Count} bots");
@@ -129,6 +145,18 @@ namespace MortalEnemies
 					MortalEnemies.Logger.LogDebug($"  └Reviving {tempMortality.gameObject.name}, which has {tempMortality.Health} health");
 					tempMortality.Revive();
 				}
+			}
+
+			// Debug key: Toggle screen logger
+			if (Input.GetKeyUp(debugKeys[6]))
+			{
+				MortalEnemies.Logger.LogDebug("Test - Toggling on-screen log");
+				if (ScreenLogListener.Instance is null)
+				{
+					MortalEnemies.Logger.LogDebug("Could not find a ScreenLogListener to toggle");
+					return;
+				}
+				ScreenLogListener.Instance.outputQueue = !ScreenLogListener.Instance.outputQueue;
 			}
 		}
 	}
