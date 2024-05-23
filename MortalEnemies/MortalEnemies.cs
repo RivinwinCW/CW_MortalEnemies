@@ -13,13 +13,13 @@ namespace MortalEnemies
 		public static MortalEnemies Instance { get; private set; } = null!;
 		internal new static ManualLogSource Logger { get; private set; } = null!;
 
-		internal static ScreenLogListener? ScreenLogListener = null; // Debug
+		internal static ScreenLogListener? ScreenLogListener = null; // Debug, leave here
 
 		private void Awake()
 		{
 			Instance = this;
 			Logger = base.Logger;
-			ScreenLogListener = new();
+			//ScreenLogListener = new(); // Enables on-screen logging for Mortal Enemies
 
 			Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} installed, hooking...");
 			

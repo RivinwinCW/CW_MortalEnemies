@@ -63,7 +63,7 @@ namespace MortalEnemies
 			internal set
 			{
 				if (IsAlive && value <= 0f) KillEffect();
-				health = Mathf.Max(value, 0f);
+				health = Mathf.Min(value, MaxHealth); ;
 			}
 		}
 
