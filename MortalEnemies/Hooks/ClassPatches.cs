@@ -3,6 +3,7 @@ using System;
 using MonoMod.RuntimeDetour.HookGen;
 using HarmonyLib;
 using CessilCellsCeaChells.CeaChore;
+using UnityEngine;
 
 //[assembly: RequiresMethod(typeof(Bot), "Awake", typeof(void))]
 
@@ -16,9 +17,6 @@ namespace MortalEnemies.Patches
 			HookEndpointManager.Add(AccessTools.Method(typeof(Bot), "Start"), HookBotAwake);
 			HookEndpointManager.Add(AccessTools.Method(typeof(Player), "Awake"), HookPlayerAwake);
 
-			// Register mod to Mycelium
-
-
 			// Subscribe to Mycelium events
 			MyceliumNetwork.LobbyEntered += Mortality.UpdateNetworkState;
 			MyceliumNetwork.LobbyLeft += Mortality.UpdateNetworkState;
@@ -26,28 +24,20 @@ namespace MortalEnemies.Patches
 
 		public static void HookBotAwake(Action<Bot> orig, Bot self)
 		{
-			if (self.GetType() != typeof(Bot)) return; // safety
-
-			if (self.hideFlags == UnityEngine.HideFlags.HideAndDontSave || !self.isActiveAndEnabled)
+			// Determine new parent GameObject
+			GameObject newParent = self.gameObject;
+			while (!newParent.name.Contains("(Clone)") && newParent.transform.parent is not null)
 			{
-				MortalEnemies.Logger.LogDebug("Not Adding mortality because object is not active");
-				return;
+				newParent = newParent.transform.parent.gameObject; // move upwards through the tree starting at the current gameobject till at root or the name contains (Clone)
 			}
-
-			MortalEnemies.Logger.LogDebug(" ");
-			MortalEnemies.Logger.LogDebug("Adding Mortality to " + self.gameObject.name);
 
 			// Run original Awake() function
 			orig(self);
 
 			// Create a mortality component and attach to same GameObject as Bot
-			if (self.gameObject.GetComponent<Mortality>() != null)
-			{
-				MortalEnemies.Logger.LogDebug("Tried adding additional Mortality component to same object");
-				return;
-			}
+			if (newParent.GetComponent<Mortality>() is not null) return;
 
-			Mortality_Bot newMortality = self.gameObject.transform.parent.gameObject.AddComponent<Mortality_Bot>();
+			Mortality_Bot newMortality = newParent.AddComponent<Mortality_Bot>();
 			newMortality?.SetBot(self);
 		}
 
@@ -59,10 +49,8 @@ namespace MortalEnemies.Patches
 			// Sanity check
 			if (self.ai) return;
 
-			MortalEnemies.Logger.LogDebug("Adding Mortality to " + self.gameObject.name);
 			// Create a mortality component and attach to same GameObject as Player
 			Mortality_Player newMortality = self.gameObject.AddComponent<Mortality_Player>();
-			if (newMortality is null) MortalEnemies.Logger.LogDebug("Failed to add Mortality component!");
 			newMortality?.SetPlayer(self);
 		}
 	}

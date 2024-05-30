@@ -14,9 +14,9 @@ namespace MortalEnemies
 		 * ReviveEffect
 		 */
 
-		// TRANSFORM VARIABLES
-		internal string containerObjectName = "Unknown";
-		internal GameObject? containerObject;
+		// LIST OF VIRTUALS
+		/* DamageEffect
+		 */
 
 		// CONSTANTS
 		public static readonly uint modId = (uint)MyPluginInfo.PLUGIN_GUID.GetHashCode(); // was suggested going to unity.hash128
@@ -45,37 +45,11 @@ namespace MortalEnemies
 			// Create Singleton if it doesnt exist
 			MortalSingleton tempSingletonRef = MortalSingleton.Instance;
 
-
-
-
-			containerObject = gameObject;
-			while (!containerObject.name.Contains("(Clone)") && containerObject.transform.parent != null)
-			{
-				containerObject = containerObject.transform.parent.gameObject;
-			}
-			if (containerObject is not null)
-			{
-				if (containerObject.name.Contains("(Clone)"))
-				{
-					containerObjectName = containerObject.name;
-					transform.SetParent(containerObject.transform);
-				}
-					
-			}
-
-
-
-
-
-
-			// Set up networking variables
-			viewIDClone = GetComponent<PhotonView>().ViewID;
-
-			MortalEnemies.Logger.LogDebug("Network info: modID: " + modId + ", viewIDClone: " + viewIDClone);
-
 			// Add this mortality to the list stored in the singleton
 			MortalSingleton.Instance.Mortalities.Add(this);
 
+			// Register with Mycelium
+			viewIDClone = GetComponent<PhotonView>().ViewID;
 			MyceliumNetwork.RegisterNetworkObject(this, modId, viewIDClone);
 		}
 
@@ -156,11 +130,7 @@ namespace MortalEnemies
 		// Applys Damage or Healing on the Host and propigates to Clients, triggers effects on both
 		public void Damage(float inDamage)
 		{
-			if (inDamage <= 0f || !Authorized)
-			{
-				MortalEnemies.Logger.LogDebug($"Not authorized to deal damage to to {this.gameObject.name}");
-				return; // Sanity check
-			}
+			if (inDamage <= 0f || !Authorized) return; // Sanity check
 			DamageEffect(); // Trigger ui, particle, materials effects etc
 
 			Health -= inDamage;
@@ -213,12 +183,8 @@ namespace MortalEnemies
 		{
 			if (!Authorized) return;
 
-			MortalEnemies.Logger.LogDebug($"Revive() on {gameObject.name}");
-
 			ReviveEffect();
-
 			Health = Mathf.Clamp(newHealth, 0.01f, MaxHealth);
-
 			if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(Revive_RPC), ReliableType.Reliable, viewIDClone, Health);
 		}
 
@@ -270,8 +236,6 @@ namespace MortalEnemies
 		{
 			if (!Authorized) return;
 			dotSources.Remove(toRemove);
-
-			MortalEnemies.Logger.LogDebug("viewIDClone: " + viewIDClone);
 
 			if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(RemoveDoTSource_RPC), ReliableType.Reliable, viewIDClone, toRemove.ID);
 		}
