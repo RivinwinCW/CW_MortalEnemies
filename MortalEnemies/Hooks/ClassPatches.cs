@@ -16,10 +16,6 @@ namespace MortalEnemies.Patches
 			// Hook to Bot.Awake() created by CCCC
 			HookEndpointManager.Add(AccessTools.Method(typeof(Bot), "Start"), HookBotAwake);
 			HookEndpointManager.Add(AccessTools.Method(typeof(Player), "Awake"), HookPlayerAwake);
-
-			// Subscribe to Mycelium events
-			MyceliumNetwork.LobbyEntered += Mortality.UpdateNetworkState;
-			MyceliumNetwork.LobbyLeft += Mortality.UpdateNetworkState;
 		}
 
 		public static void HookBotAwake(Action<Bot> orig, Bot self)

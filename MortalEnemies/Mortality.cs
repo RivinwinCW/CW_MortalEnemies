@@ -1,6 +1,8 @@
-﻿using MyceliumNetworking;
+﻿using Mono.Cecil;
+using MyceliumNetworking;
 using Photon.Pun;
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 
 namespace MortalEnemies
@@ -20,6 +22,11 @@ namespace MortalEnemies
 
 		// CONSTANTS
 		public static readonly uint modId = (uint)MyPluginInfo.PLUGIN_GUID.GetHashCode(); // was suggested going to unity.hash128
+
+		// Networking Variables
+		public int viewIDClone;
+		private bool isAutonomousProxy;
+		private MortalSingleton mortalSingleton = MortalSingleton.Instance; // We mostly cache this because its used in FixedUpdate();
 
 		// DoT Variables
 		private enum TimedEffectState
@@ -42,24 +49,21 @@ namespace MortalEnemies
 		// Events
 		protected virtual void Awake()
 		{
-			// Create Singleton if it doesnt exist
-			MortalSingleton tempSingletonRef = MortalSingleton.Instance;
-
 			// Add this mortality to the list stored in the singleton
-			MortalSingleton.Instance.Mortalities.Add(this);
+			mortalSingleton.Mortalities.Add(this);
 
 			// Register with Mycelium
 			viewIDClone = GetComponent<PhotonView>().ViewID;
 			MyceliumNetwork.RegisterNetworkObject(this, modId, viewIDClone);
 		}
 
-		private void FixedUpdate()
+		private void FixedUpdate() // By using FixedUpdate() as the basis for the DoT system it should be compatible with slow-motion/bullet-time mods
 		{
 			// Handle damage over time
 			if (dotSources.Count != 0)
 			{
 				// Clear old dots and recalculate damage per tick if necessary
-				while (dotSources.Count > 0 && dotSources[0].expireTime < Time.time) // Assumes that dotSources is always sorted soonest to latest by expireTime
+				while (dotSources.Count > 0 && dotSources[0].expireTick < mortalSingleton.CurrentTick) // Assumes that dotSources is always sorted soonest to latest by expireTick
 				{
 					dotSources.RemoveAt(0);
 					damagePerTickDirty = true;
@@ -78,28 +82,10 @@ namespace MortalEnemies
 		protected virtual void OnDestroy()
 		{
 			MyceliumNetwork.DeregisterNetworkObject(this, modId, viewIDClone);
-			MortalSingleton.Instance.Mortalities.Remove(this);
+			mortalSingleton.Mortalities.Remove(this);
 		}
 
-		// NETWORKING
-		public static bool Authorized => _authority > NetworkState.Client;
-
-		public int viewIDClone; // photon view id for mycelium object masking
-		private enum NetworkState
-		{
-			Offline,
-			Client,
-			Autonamous,
-			Server
-		}
-
-		private static NetworkState _authority = NetworkState.Offline;
-		internal static void UpdateNetworkState()
-		{
-			if (MyceliumNetwork.IsHost)	_authority = NetworkState.Server;
-			else if (MyceliumNetwork.InLobby) _authority = NetworkState.Client;
-			else _authority = NetworkState.Offline;
-		}
+		
 
 		// PUBLIC METHODS TO CALL FROM OTHER MODS
 
@@ -130,96 +116,138 @@ namespace MortalEnemies
 		// Applys Damage or Healing on the Host and propigates to Clients, triggers effects on both
 		public void Damage(float inDamage)
 		{
-			if (inDamage <= 0f || !Authorized) return; // Sanity check
-			DamageEffect(); // Trigger ui, particle, materials effects etc
+			if (inDamage <= 0f) return;
 
-			Health -= inDamage;
-
-			if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(Damage_RPC), ReliableType.Reliable, viewIDClone, Health);
+			if (isAutonomousProxy) RPCA_Damage(inDamage); // Run locally if autonomous
+			else if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(RPCA_Damage), ReliableType.Reliable, viewIDClone, inDamage); // Run on all machines if Authorized
 		}
 
-		public DoTSource DamageOverTime(float inDamagePerSecond, float inSeconds)
+		public ushort DamageOverTime(float inDamagePerSecond, float inSeconds) // returns the ID of the source created
 		{
-			if (!Authorized || inDamagePerSecond * inSeconds <= 0f) return null; // Sanity check
-			DoTEffect(); // Trigger ui, particle, materials effects etc
+			if (!isAutonomousProxy && !MyceliumNetwork.IsHost) return 0; // Sanity check - returns 0 as error code
+
 			ushort newID = GetUnigueDoTSourceID();
+			uint newTicks = (ushort)Mathf.RoundToInt(inSeconds / Time.fixedDeltaTime);
+			float tempDpT = inDamagePerSecond * Time.fixedDeltaTime;
 
-			// In testing this assignment was necessary, else Mycelium throws a casting exception, would like to remove
-			float tempDPS = inDamagePerSecond;
-			float tempSeconds = inSeconds;
-
-			DoTSource resultSource = AddDoT(tempDPS, tempSeconds, newID);
-
-			if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(DamageOverTime_RPC), ReliableType.Reliable, viewIDClone, tempDPS, tempSeconds, newID);
-			return resultSource;
+			if (isAutonomousProxy) RPCA_AddDoTSource(tempDpT, newTicks, newID);
+			else if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(RPCA_AddDoTSource), ReliableType.Reliable, viewIDClone, tempDpT, newTicks, newID);
+			return newID;
 		}
 
-		public void Heal(float inHealth = 0f)
+		public void Heal(float inHealth)
 		{
-			if (!Authorized || inHealth <= 0f) return; // Sanity check
-			HealEffect();
-			Health += inHealth;
+			if (inHealth <= 0f) return; // Sanity check
 
-			if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(Heal_RPC), ReliableType.Reliable, viewIDClone, Health);
+			if (isAutonomousProxy) RPCA_Heal(inHealth);
+			else if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(RPCA_Heal), ReliableType.Reliable, viewIDClone, inHealth);
 		}
 
-		public DoTSource HealOverTime(float inHealthPerSecond, float inSeconds)
+		public ushort HealOverTime(float inHealthPerSecond, float inSeconds)
 		{
-			if (!Authorized || inHealthPerSecond * inSeconds <= 0f) return null; // Sanity check
-			HoTEffect();
-			ushort newID = GetUnigueDoTSourceID();
-
-			// In testing this assignment was necessary, else Mycelium throws a casting exception, would like to remove
-			float tempDPS = -inHealthPerSecond;
-			float tempSeconds = inSeconds;
-
-			DoTSource resultSource = AddDoT(tempDPS, tempSeconds, newID);
-			
-			if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(DamageOverTime_RPC), ReliableType.Reliable, viewIDClone, tempDPS, tempSeconds, newID);
-			return resultSource;
+			return DamageOverTime(-inHealthPerSecond, inSeconds);
 		}
 
 		public void Revive(float newHealth = 100f)
 		{
-			if (!Authorized) return;
+			if (newHealth <= 0f) return; // Sanity check
+			if (newHealth > MaxHealth) newHealth = MaxHealth;
 
-			ReviveEffect();
-			Health = Mathf.Clamp(newHealth, 0.01f, MaxHealth);
-			if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(Revive_RPC), ReliableType.Reliable, viewIDClone, Health);
+			if (isAutonomousProxy) RPCA_Revive(newHealth);
+			else if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(RPCA_Revive), ReliableType.Reliable, viewIDClone, newHealth);
 		}
 
 		private static ushort GetUnigueDoTSourceID()
 		{
-			if (!MyceliumNetwork.IsHost) return 0;
-			return ++nextDoTSourceID;
+			if (!MyceliumNetwork.IsHost) return 0; // proxy dot sources will have an id of 0, TODO: need to implement a system to remove them using client level IDs
+			return ++nextDoTSourceID; // because we preincrement it should never be 0 for networked sources
 		}
 
 		// Can be referenced from other mods so that a DoTSource can be removed as well as created using a reference
 		public class DoTSource
 		{
-			internal float damagePerTick, expireTime;
+			internal float damagePerTick;
+			internal uint expireTick, ticksRemaining; // ticksRemaining/expireTime are not always synced and safe!
 			internal ushort ID;
-			internal DoTSource(float newDamagePerSecond, float newDuration, ushort newID)
+			internal DoTSource(float newDpT, uint newTicks, ushort newID)
 			{
-				damagePerTick = newDamagePerSecond * Time.fixedDeltaTime;
-				expireTime = Time.time + newDuration;
+				damagePerTick = newDpT;
+				ticksRemaining = newTicks;
+				expireTick = MortalSingleton.Instance.CurrentTick + newTicks;
 				ID = newID;
+			}
+
+			internal bool paused;
+			internal bool Paused
+			{
+				get { return paused; }
+				set
+				{
+					if (paused == value) return; // only do following logic if value is actually changing
+					if (value) ticksRemaining = expireTick - MortalSingleton.Instance.CurrentTick; // I am sure i have a -1 falicy error in here somewhere, testing needed
+					else expireTick = MortalSingleton.Instance.CurrentTick + ticksRemaining;
+					paused = value;
+				}
 			}
 		}
 
-		private DoTSource AddDoT(float dps, float duration, ushort newID)
+		public void RemoveDot(ushort IDtoRemove)
 		{
-			DoTSource newDoT = new DoTSource(dps, duration, newID);
-			AddDoT(newDoT);
-			return newDoT;
+			if (isAutonomousProxy) RPCA_RemoveDoTSource(IDtoRemove);
+			else if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(RPCA_RemoveDoTSource), ReliableType.Reliable, viewIDClone, IDtoRemove);
+		}
+		public void PauseDoT(ushort IDtoPause)
+		{
+			if (isAutonomousProxy) RPCA_PauseDoTSource(IDtoPause);
+			else if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(RPCA_PauseDoTSource), ReliableType.Reliable, viewIDClone, IDtoPause);
+		}
+		public void ResumeDoT(ushort IDtoResume)
+		{
+			if (isAutonomousProxy) RPCA_ResumeDoTSource(IDtoResume);
+			else if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(RPCA_ResumeDoTSource), ReliableType.Reliable, viewIDClone, IDtoResume);
+		}
+		protected virtual void CalcDamagePerTick()
+		{
+			// Reset variable, then sum up
+			damagePerTick = 0f;
+			foreach (DoTSource tempDoT in dotSources) if (!tempDoT.paused) damagePerTick += tempDoT.damagePerTick;
+			damagePerTickDirty = false;
+
+			// Update whether damage/heal over time effects are valid
+			if (Mathf.Abs(damagePerTick) > 0.015) uiEffectState = (damagePerTick > 0 ? TimedEffectState.Damaging : TimedEffectState.Healing);
+			else uiEffectState = TimedEffectState.None;
 		}
 
-		private void AddDoT(DoTSource newSource)
+		// RPCs
+		[CustomRPC]
+		internal void RPCA_Damage(float sentDamage)
 		{
-			// get dots from the end of the list and check if they expire before our new dot
+			DamageEffect(); // Trigger ui, particle, materials effects etc
+			Health -= sentDamage;
+		}
+
+		[CustomRPC]
+		internal void RPCA_Heal(float sentHealth)
+		{
+			HealEffect();
+			Health += sentHealth;
+		}
+
+		[CustomRPC]
+		internal void RPCA_Revive(float sentHealth)
+		{
+			Health = sentHealth;
+			ReviveEffect();
+		}
+
+		[CustomRPC]
+		internal void RPCA_AddDoTSource(float sentDpT, uint sentTicks, ushort sentID)
+		{
+			DoTSource newSource = new DoTSource(sentDpT, sentTicks, sentID);
+			// get dots from the end of the list and check if they expire before our new dot, if they do, insert after it
 			for (int i = dotSources.Count - 1; i >= 0; i--)
 			{
-				if (dotSources[i].expireTime < newSource.expireTime)
+				if (dotSources[i].expireTick <= newSource.expireTick)
 				{
 					// insert the new dot in the middle/end
 					dotSources.Insert(i + 1, newSource);
@@ -232,72 +260,43 @@ namespace MortalEnemies
 			damagePerTickDirty = true;
 		}
 
-		public void RemoveDot(DoTSource toRemove)
-		{
-			if (!Authorized) return;
-			dotSources.Remove(toRemove);
-
-			if (MyceliumNetwork.IsHost) MyceliumNetwork.RPCMasked(modId, nameof(RemoveDoTSource_RPC), ReliableType.Reliable, viewIDClone, toRemove.ID);
-		}
-
-		protected virtual void CalcDamagePerTick()
-		{
-			// Reset variable, then sum up
-			damagePerTick = 0f;
-			foreach (DoTSource tempDoT in dotSources) damagePerTick += tempDoT.damagePerTick;
-			damagePerTickDirty = false;
-
-			// Update whether damage/heal over time effects are valid
-			if (Mathf.Abs(damagePerTick) > 0.015) uiEffectState = (damagePerTick > 0 ? TimedEffectState.Damaging : TimedEffectState.Healing);
-			else uiEffectState = TimedEffectState.None;
-		}
-
-		// RPCs - called by server on clients
 		[CustomRPC]
-		internal void Damage_RPC(float serverHealth)
+		internal void RPCA_RemoveDoTSource(ushort toRemove)
 		{
-			if (Authorized) return;
-
-			DamageEffect();
-			Health = serverHealth;
-		}
-
-		[CustomRPC]
-		internal void DamageOverTime_RPC(float damagePerSecond, float duration, ushort ID)
-		{
-			if (Authorized) return;
-
-			AddDoT(damagePerSecond, duration, ID);
-		}
-
-		[CustomRPC]
-		internal void Heal_RPC(float serverHealth)
-		{
-			if (Authorized) return;
-
-			Heal();
-			Health = serverHealth;
-		}
-
-		[CustomRPC]
-		internal void Revive_RPC(float serverHealth)
-		{
-			if (Authorized) return;
-
-			Revive();
-			Health = serverHealth;
-		}
-
-		[CustomRPC]
-		internal void RemoveDoTSource_RPC(ushort toRemove)
-		{
-			if (Authorized) return;
-
 			foreach (DoTSource tempSource in dotSources)
 			{
 				if (tempSource.ID == toRemove)
 				{
 					dotSources.Remove(tempSource);
+					damagePerTickDirty = true;
+					break;
+				}
+			}
+		}
+
+		[CustomRPC]
+		internal void RPCA_PauseDoTSource(ushort toPause)
+		{
+			foreach (DoTSource tempSource in dotSources)
+			{
+				if (tempSource.ID == toPause)
+				{
+					tempSource.Paused = true;
+					damagePerTickDirty = true;
+					break;
+				}
+			}
+		}
+
+		[CustomRPC]
+		internal void RPCA_ResumeDoTSource(ushort toResume)
+		{
+			foreach (DoTSource tempSource in dotSources)
+			{
+				if (tempSource.ID == toResume)
+				{
+					tempSource.Paused = false;
+					damagePerTickDirty = true;
 					break;
 				}
 			}

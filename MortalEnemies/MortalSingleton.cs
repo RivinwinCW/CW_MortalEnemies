@@ -1,32 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using MyceliumNetworking;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MortalEnemies
 {
+	// Provides a globally accessible cache for Mortality components and settings
 	public class MortalSingleton : MonoBehaviour
 	{
-		private static KeyCode[] debugKeys =
-		{
-			KeyCode.Alpha1,
-			KeyCode.Alpha2,
-			KeyCode.Alpha3,
-			KeyCode.Alpha4,
-			KeyCode.Alpha5,
-			KeyCode.Alpha6,
-			KeyCode.Alpha7,
-			KeyCode.Alpha8,
-			KeyCode.Alpha9,
-			KeyCode.Alpha0
-		};
-
+		// Singleton pattern
 		private static MortalSingleton? _instance;
 		public static MortalSingleton Instance
 		{
 			get
 			{
-				if (_instance is null) CreateMortalitySingleton();
+				// Ensure instance exists before returning reference
+				if (_instance is null) CreateMortalSingleton();
 				return _instance!;
 			}
+		}
+
+		// VARIABLES
+		private uint currentTick;
+		public uint CurrentTick
+		{
+			get { return currentTick; }
+			private set { }
 		}
 
 		private HashSet<Mortality> _mortalities = new();
@@ -34,15 +32,16 @@ namespace MortalEnemies
 		public HashSet<Mortality> Mortalities
 		{
 			get { return _mortalities; }
-			private set { _mortalities = value; }
+			internal set { _mortalities = value; }
 		}
 		public HashSet<Mortality> BotMortalities
 		{
 			get { return _botMortalities; }
-			private set { _botMortalities = value; }
+			internal set { _botMortalities = value; }
 		}
 
-		public static void CreateMortalitySingleton()
+		// METHODS
+		public static void CreateMortalSingleton()
 		{
 			_instance = GameObject.FindFirstObjectByType<MortalSingleton>();
 			if (_instance is not null) return;
@@ -51,19 +50,25 @@ namespace MortalEnemies
 			DontDestroyOnLoad(tempObject);
 		}
 
+		// EVENTS
 		void Awake()
 		{
-			// Set _instance following singleton pattern
-			if (_instance == null) _instance = this;
+			if (_instance == null) _instance = this; // Set _instance following singleton pattern
 			else if (_instance != this) // Error state - singleton already exists
 			{
-				MortalEnemies.Logger.LogDebug("MortalSingleton already exists, destroying duplicate");
+				MortalEnemies.Logger.LogWarning("MortalSingleton already exists, destroying new duplicate");
 				Destroy(this);
 				return;
 			}
 
+			// Probably unnecessary, but rebuilds the hashtable state if the singleton is destroyed and recreated
 			foreach (Mortality tempMort in FindObjectsOfType<Mortality>()) _mortalities.Add(tempMort);
-			MortalEnemies.Logger.LogDebug("MortalSingleton created");
+			foreach (Mortality tempMort in FindObjectsOfType<Mortality_Bot>()) _botMortalities.Add(tempMort);
+		}
+
+		void FixedUpdate()
+		{
+			currentTick++; // should take around 2.7 years to overflow
 		}
 	}
 }
