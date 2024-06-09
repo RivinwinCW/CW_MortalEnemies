@@ -1,6 +1,6 @@
 #   Mortal Enemies
 ## is a Content Warning mod
-that aims to allow the modding community a simple and compatible to way to deal damage to and kill monsters. It is still is testing and there is much to be done to polish the results in-game, but already all enemy types are killable.
+that aims to allow the modding community a simple and compatible way to deal damage and kill monsters. It is still in testing and there is much to be done to polish the in-game effects, but already all enemy types are killable.
 
 In truth the enemies are more knocked unconcious than anything else, as they can be instantly revived and return to normal as well. The mod works by disabling components on the enemy GameObjects and altering values associated with their ragdolls and controllers, nothing is destroyed or despawned.
 
